@@ -122,7 +122,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 300px;
+            max-height: 250px;
             overflow-y: auto;
         }
 
@@ -238,7 +238,7 @@
                         <th>Карта</th>
                         <th class="th-center" style="color: var(--easy-color)">Easy</th>
                         <th class="th-center" style="color: var(--casual-color)">Casual</th>
-                        <th class="th-center" style="color: var(--inter-color)">Inter</th>
+                        <th class="th-center" style="color: var(--inter-color)">Intermediate</th>
                         <th class="th-center" style="color: var(--molten-color)">Molten</th>
                         <th class="th-center" style="color: var(--fallen-color)">Fallen</th>
                         <th class="th-center" style="color: var(--frost-color)">Frost</th>
@@ -271,8 +271,9 @@
 </div>
 
 <script>
-    // --- DATABASE --- Полный список карт TDS с изображениями
+    // --- DATABASE --- Полный список карт TDS с официальными встроенными изображениями
     const mapsData = [
+        // Карты со значками (полная база Wiki)
         { name: "Abandoned City", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Abandoned_City_Icon.png" },
         { name: "Abyssal Trench", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f6/Abyssal_Trench_Icon.png" },
         { name: "Area 52", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Area_52_Icon.png" },
@@ -346,7 +347,7 @@
         { name: "Winter Stronghold", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/6e/Winter_Stronghold_Icon.png" },
         { name: "Wrecked Battlefield", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4a/Wrecked_Battlefield_Icon.png" },
         { name: "Wrecked Battlefield II", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Wrecked_Battlefield_II_Icon.png" },
-        // Карты без официальных иконок
+        // Карты без официальных значков (нейтральное превью)
         { name: "Forgotten Docks", img: "" },
         { name: "Legacy Dusty Bridges", img: "" },
         { name: "Legacy Gilded Path", img: "" },
@@ -488,73 +489,3 @@
             const mapName = e.target.getAttribute('data-map');
             const diff = e.target.getAttribute('data-diff');
             if (!playersData[currentPlayer]) playersData[currentPlayer] = {};
-            playersData[currentPlayer][`${mapName}_${diff}`] = e.target.checked;
-            saveData();
-            updateLeaderboard(); // Обновляем проценты в ледерборде мгновенно
-        }
-    });
-
-    // Фича "Где я остановился?"
-    document.getElementById('btn-where-am-i').addEventListener('click', () => {
-        document.querySelectorAll('tr').forEach(r => r.classList.remove('highlight-row'));
-        for (let i = 0; i < mapsData.length; i++) {
-            let mapComplete = true;
-            for (let diff of diffs) {
-                if (!playersData[currentPlayer] || !playersData[currentPlayer][`${mapsData[i].name}_${diff}`]) {
-                    mapComplete = false; break;
-                }
-            }
-            if (!mapComplete) {
-                const targetRow = document.getElementById(`map-row-${i}`);
-                targetRow.classList.add('highlight-row');
-                targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                break;
-            }
-        }
-    });
-
-    // Сброс текущего профиля
-    document.getElementById('btn-reset').addEventListener('click', () => {
-        if (confirm(`Очистить весь прогресс карт для текущего профиля "${currentPlayer}"?`)) {
-            playersData[currentPlayer] = {};
-            saveData();
-            renderChecklist();
-            updateLeaderboard();
-        }
-    });
-
-    // Наведение на карту для превью
-    tableBody.addEventListener('mouseover', (e) => {
-        if (e.target.classList.contains('map-name')) {
-            const mapIndex = e.target.getAttribute('data-index');
-            const map = mapsData[mapIndex];
-
-            if (map.img) {
-                pImg.src = map.img;
-                pImg.style.display = 'block';
-                pMapTitle.innerText = map.name;
-                pMapTitle.style.display = 'block';
-                pPlaceholder.style.display = 'none';
-                // Убираем старое нейтральное превью, если оно было
-                const oldFallback = pImgBox.querySelector('div[style*="width:100%"]');
-                if(oldFallback) oldFallback.remove();
-            } else {
-                pImg.style.display = 'none';
-                pMapTitle.style.display = 'none';
-                pPlaceholder.style.display = 'none';
-                // Добавляем красивое нейтральное превью
-                const oldFallback = pImgBox.querySelector('div[style*="width:100%"]');
-                if(oldFallback) oldFallback.remove();
-                pImgBox.insertAdjacentHTML('afterbegin', generateFallbackPreview(map.name));
-            }
-        }
-    });
-
-    // Инициализация
-    if(Object.keys(playersData).length === 0) playersData = {'Игрок': {}};
-    if(!currentPlayer) currentPlayer = Object.keys(playersData)[0];
-    updateLeaderboard();
-    renderChecklist();
-</script>
-</body>
-</html>

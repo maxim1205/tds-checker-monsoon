@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TDS Completion Checklist</title>
+    <title>TDS Completion Checklist & Leaderboard</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -13,9 +13,11 @@
             --text-color: #c5c6c7;
             --text-bright: #ffffff;
             --easy-color: #2ecc71;
-            --casual-color: #f1c40f;
-            --inter-color: #e67e22;
-            --molten-color: #e74c3c;
+            --casual-color: #27ae60;
+            --inter-color: #f1c40f;
+            --molten-color: #e67e22;
+            --fallen-color: #e74c3c;
+            --frost-color: #3498db;
         }
 
         * {
@@ -35,10 +37,9 @@
 
         .wrapper {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1600px;
             display: flex;
             gap: 20px;
-            position: relative;
         }
 
         .main-content {
@@ -50,66 +51,112 @@
             border: 1px solid #2f3e46;
         }
 
-        h1 {
+        .sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 1px solid #2f3e46;
+        }
+
+        h1, h2 {
             color: var(--text-bright);
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 28px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(102, 252, 241, 0.3);
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(102, 252, 241, 0.2);
+            margin-bottom: 15px;
         }
 
-        /* Панель профиля и прогресса */
-        .profile-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: space-between;
-            align-items: center;
-            background: #151b24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border-left: 4px solid var(--accent-color);
-        }
+        h1 { text-align: center; font-size: 24px; }
+        h2 { font-size: 18px; border-bottom: 1px solid #2a3744; padding-bottom: 5px; color: var(--accent-color); }
 
-        .nickname-wrapper {
+        .profile-manager {
             display: flex;
-            align-items: center;
             gap: 10px;
-        }
-
-        .nickname-wrapper label {
-            color: var(--accent-color);
-            font-weight: bold;
+            margin-bottom: 15px;
         }
 
         input[type="text"] {
+            flex: 1;
             background: var(--bg-color);
             border: 1px solid var(--accent-hover);
             color: var(--text-bright);
             padding: 8px 12px;
             border-radius: 4px;
             outline: none;
-            font-size: 16px;
-            transition: all 0.3s;
+            font-size: 14px;
         }
 
         input[type="text"]:focus {
             border-color: var(--accent-color);
-            box-shadow: 0 0 8px rgba(102, 252, 241, 0.5);
+            box-shadow: 0 0 8px rgba(102, 252, 241, 0.4);
         }
 
-        .stats {
-            font-size: 16px;
-            color: var(--text-bright);
-        }
-
-        .stats span {
-            color: var(--accent-color);
+        button {
+            background: var(--accent-hover);
+            color: var(--bg-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
             font-weight: bold;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 12px;
         }
+
+        button:hover {
+            background: var(--accent-color);
+            transform: translateY(-1px);
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #151b24;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid #3d526e;
+            cursor: pointer;
+        }
+
+        .leaderboard-item.active {
+            border-left-color: var(--accent-color);
+            background: #1a2430;
+        }
+
+        .leaderboard-item:hover {
+            background: #1e2936;
+        }
+
+        .player-info { display: flex; flex-direction: column; }
+        .player-name { color: var(--text-bright); font-weight: bold; font-size: 14px; }
+        .player-pct { font-size: 12px; color: var(--accent-color); }
+
+        .delete-prof-btn {
+            background: transparent;
+            color: #ff7675;
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+        .delete-prof-btn:hover { background: #3a1c1c; }
 
         .controls {
             display: flex;
@@ -117,220 +164,60 @@
             margin-bottom: 20px;
         }
 
-        button {
-            background: var(--accent-hover);
-            color: var(--bg-color);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            font-size: 13px;
-        }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: #1a222d; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #2a3744; font-size: 14px; }
+        th { background-color: #151b24; color: var(--accent-color); text-transform: uppercase; font-size: 12px; }
+        .th-center, .td-center { text-align: center; }
+        tr:hover { background-color: #222d3b; }
 
-        button:hover {
-            background: var(--accent-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 252, 241, 0.3);
-        }
+        .map-name { color: var(--text-bright); font-weight: 600; cursor: pointer; }
+        .map-name:hover { color: var(--accent-color); }
 
-        /* Таблица */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            background: #1a222d;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #2a3744;
-        }
-
-        th {
-            background-color: #151b24;
-            color: var(--accent-color);
-            text-transform: uppercase;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
-
-        .th-center, .td-center {
-            text-align: center;
-        }
-
-        tr:hover {
-            background-color: #222d3b;
-        }
-
-        .map-name {
-            color: var(--text-bright);
-            font-weight: 600;
-            cursor: pointer;
-            position: relative;
-            display: inline-block;
-        }
-
-        .map-name:hover {
-            color: var(--accent-color);
-        }
-
-        .map-tag {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: #2f3e46;
-            color: #9cc4b3;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        /* Кастомные чекбоксы с анимацией */
         .checkbox-container {
             display: inline-block;
             position: relative;
             cursor: pointer;
-            font-size: 22px;
-            user-select: none;
-            width: 28px;
-            height: 28px;
+            width: 22px;
+            height: 22px;
         }
 
-        .checkbox-container input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
-
+        .checkbox-container input { position: absolute; opacity: 0; width: 0; height: 0; }
         .checkmark {
             position: absolute;
-            top: 0;
-            left: 0;
-            height: 28px;
-            width: 28px;
-            background-color: #253141;
-            border-radius: 6px;
+            top: 0; left: 0; height: 22px; width: 22px;
+            background-color: #253141; border-radius: 4px;
             border: 2px solid #3d526e;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .checkbox-container:hover input ~ .checkmark {
-            border-color: var(--accent-color);
-        }
-
-        /* Анимация активации разных сложностей */
-        .checkbox-container input[data-diff="easy"]:checked ~ .checkmark {
-            background-color: var(--easy-color);
-            border-color: var(--easy-color);
-            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
-        }
-        .checkbox-container input[data-diff="casual"]:checked ~ .checkmark {
-            background-color: var(--casual-color);
-            border-color: var(--casual-color);
-            box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
-        }
-        .checkbox-container input[data-diff="inter"]:checked ~ .checkmark {
-            background-color: var(--inter-color);
-            border-color: var(--inter-color);
-            box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
-        }
-        .checkbox-container input[data-diff="molten"]:checked ~ .checkmark {
-            background-color: var(--molten-color);
-            border-color: var(--molten-color);
-            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
-        }
+        .checkbox-container input[data-diff="easy"]:checked ~ .checkmark { background-color: var(--easy-color); border-color: var(--easy-color); }
+        .checkbox-container input[data-diff="casual"]:checked ~ .checkmark { background-color: var(--casual-color); border-color: var(--casual-color); }
+        .checkbox-container input[data-diff="inter"]:checked ~ .checkmark { background-color: var(--inter-color); border-color: var(--inter-color); }
+        .checkbox-container input[data-diff="molten"]:checked ~ .checkmark { background-color: var(--molten-color); border-color: var(--molten-color); }
+        .checkbox-container input[data-diff="fallen"]:checked ~ .checkmark { background-color: var(--fallen-color); border-color: var(--fallen-color); }
+        .checkbox-container input[data-diff="frost"]:checked ~ .checkmark { background-color: var(--frost-color); border-color: var(--frost-color); }
 
         .checkmark:after {
-            content: "";
-            position: absolute;
-            display: none;
-            left: 9px;
-            top: 4px;
-            width: 6px;
-            height: 12px;
-            border: solid white;
-            border-width: 0 3px 3px 0;
-            transform: rotate(45deg);
+            content: ""; position: absolute; display: none;
+            left: 6px; top: 2px; width: 4px; height: 8px;
+            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
         }
+        .checkbox-container input:checked ~ .checkmark:after { display: block; }
 
-        .checkbox-container input:checked ~ .checkmark:after {
-            display: block;
-        }
+        .preview-img-box { width: 100%; height: 160px; background: #151b24; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #3d526e; margin-top: 10px; position: relative;}
+        .preview-img-box img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .preview-placeholder { color: #556c85; font-size: 12px; padding: 10px; text-align: center; }
+        .preview-map-title { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 14px; font-weight: bold; text-align: center;}
 
-        .checkbox-container input:checked ~ .checkmark {
-            transform: scale(1.1);
-        }
-
-        /* Виджет предпросмотра карты */
-        .preview-sidebar {
-            width: 300px;
-            background: var(--container-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            border: 1px solid #2f3e46;
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .preview-title {
-            color: var(--accent-color);
-            font-size: 18px;
-            margin-bottom: 12px;
-            font-weight: bold;
-        }
-
-        .preview-img-box {
-            width: 100%;
-            height: 160px;
-            background: #151b24;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #3d526e;
-        }
-
-        .preview-img-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        .preview-placeholder {
-            color: #556c85;
-            font-size: 14px;
-            padding: 10px;
-        }
-
-        .highlight-row {
-            animation: pulse-row 2s infinite alternate;
-        }
-
+        .highlight-row { animation: pulse-row 1s infinite alternate; }
         @keyframes pulse-row {
-            from { background-color: rgba(102, 252, 241, 0.05); }
-            to { background-color: rgba(102, 252, 241, 0.15); }
+            from { background-color: rgba(102, 252, 241, 0.02); }
+            to { background-color: rgba(102, 252, 241, 0.12); }
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .wrapper { flex-direction: column; }
-            .preview-sidebar { width: 100%; position: static; }
+            .sidebar { width: 100%; }
         }
     </style>
 </head>
@@ -338,21 +225,10 @@
 
 <div class="wrapper">
     <div class="main-content">
-        <h1>TDS Completion Checklist</h1>
-        
-        <div class="profile-section">
-            <div class="nickname-wrapper">
-                <label for="username">Игрок:</label>
-                <input type="text" id="username" placeholder="Введи свой ник..." value="Игрок">
-            </div>
-            <div class="stats">
-                Прогресс: <span id="progress-text">0 / 0</span> (<span id="progress-percent">0%</span>)
-            </div>
-        </div>
-
-        <div class="controls">
+        <h1 id="main-title">TDS Progress: Игрок</h1>
+        <div class="controls" style="margin-top: 15px;">
             <button id="btn-where-am-i">Где я остановился?</button>
-            <button id="btn-reset" style="background: #3a1c1c; color: #ff7675;">Сброс</button>
+            <button id="btn-reset" style="background: #3a1c1c; color: #ff7675;">Сбросить текущий профиль</button>
         </div>
 
         <div class="table-container">
@@ -362,220 +238,273 @@
                         <th>Карта</th>
                         <th class="th-center" style="color: var(--easy-color)">Easy</th>
                         <th class="th-center" style="color: var(--casual-color)">Casual</th>
-                        <th class="th-center" style="color: var(--inter-color)">Intermediate</th>
+                        <th class="th-center" style="color: var(--inter-color)">Inter</th>
                         <th class="th-center" style="color: var(--molten-color)">Molten</th>
+                        <th class="th-center" style="color: var(--fallen-color)">Fallen</th>
+                        <th class="th-center" style="color: var(--frost-color)">Frost</th>
                     </tr>
                 </thead>
-                <tbody id="map-table-body">
-                    </tbody>
+                <tbody id="map-table-body"></tbody>
             </table>
         </div>
     </div>
 
-    <div class="preview-sidebar">
-        <div class="preview-title" id="p-title">Обзор карты</div>
-        <div class="preview-img-box">
-            <div class="preview-placeholder" id="p-placeholder">Наведи на название карты, чтобы увидеть превью</div>
-            <img src="" alt="Map Preview" id="p-img">
+    <div class="sidebar">
+        <div class="panel">
+            <h2>Таблица игроков</h2>
+            <div class="profile-manager">
+                <input type="text" id="new-player-name" placeholder="Ник нового игрока...">
+                <button id="btn-add-player">Добавить</button>
+            </div>
+            <ul class="leaderboard-list" id="leaderboard-container"></ul>
+        </div>
+
+        <div class="panel">
+            <h2>Обзор карты</h2>
+            <div class="preview-img-box" id="p-img-box">
+                <div class="preview-placeholder" id="p-placeholder">Наведи на карту, чтобы увидеть превью</div>
+                <img src="" alt="Map Preview" id="p-img">
+                <div class="preview-map-title" id="p-map-title" style="display:none;"></div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Массив карт из твоего списка
+    // --- DATABASE --- Полный список карт TDS с изображениями
     const mapsData = [
-        { name: "Abandoned City", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Abandoned_City_Icon.png" },
-        { name: "Abyssal Trench", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f6/Abyssal_Trench_Icon.png" },
-        { name: "Area 52", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Area_52_Icon.png" },
-        { name: "Atlas Colosseum", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Atlas_Colosseum_Icon.png" },
-        { name: "Autumn Falling", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Autumn_Falling_Icon.png" },
-        { name: "Black Spot Exchange", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Black_Spot_Exchange_Icon.png" },
-        { name: "Candy Valley", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Candy_Valley_Icon.png" },
-        { name: "Cataclysm", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Cataclysm_Icon.png" },
-        { name: "Chess Board", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ec/Chess_Board_Icon.png" },
-        { name: "Construction Crazy", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0d/Construction_Crazy_Icon.png" },
-        { name: "Coral Deep", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/14/Coral_Deep_Icon.png" },
-        { name: "Crossroads", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/5b/Crossroads_Icon.png" },
-        { name: "Crystal Cave", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/c9/Crystal_Cave_Icon.png" },
-        { name: "Cyber City", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/25/Cyber_City_Icon.png" },
-        { name: "Dead Ahead", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Dead_Ahead_Icon.png" },
-        { name: "Derelict Outpost", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/8/89/Derelict_Outpost_Icon.png" },
-        { name: "Deserted Village", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/8/82/Deserted_Village_Icon.png" },
-        { name: "Dusty Bridges", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/fb/Dusty_Bridges_Icon.png" },
-        { name: "Enchanted Forest", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Enchanted_Forest_Icon.png" },
-        { name: "Farm Lands", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/95/Farm_Lands_Icon.png" },
-        { name: "Forest Camp", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Forest_Camp_Icon.png" },
-        { name: "Forgetten Docks", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/05/Forgotten_Docks_Icon.png" },
-        { name: "Four Seasons", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Four_Seasons_Icon.png" },
-        { name: "Fungi Island", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/c8/Fungi_Island_Icon.png" },
-        { name: "Gilded Path", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/2c/Gilded_Path_Icon.png" },
-        { name: "Grass Isle", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/d4/Grass_Isle_Icon.png" },
-        { name: "Happy Home of Robloxia", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/9b/Happy_Home_of_Robloxia_Icon.png" },
-        { name: "Harbor", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/02/Harbor_Icon.png" },
-        { name: "Honey Valley", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a6/Honey_Valley_Icon.png" },
-        { name: "Hot Spot", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Hot_Spot_Icon.png" },
-        { name: "Iceville", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/15/Iceville_Icon.png" },
-        { name: "Infernal Abyss", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/ab/Infernal_Abyss_Icon.png" },
-        { name: "Lay By", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/97/Lay_By_Icon.png" },
-        { name: "Legacy Dusty Bridges", type: "Elevator Only", img: "" },
-        { name: "Legacy Gilded Path", type: "Elevator Only", img: "" },
-        { name: "Legacy Retro Zone", type: "Community", img: "" },
-        { name: "Legacy Simplicity", type: "Community", img: "" },
-        { name: "Legacy Space City", type: "Community", img: "" },
-        { name: "Legacy Toyboard", type: "Elevator Only", img: "" },
-        { name: "Legacy Winter Abyss", type: "Elevator Only", img: "" },
-        { name: "Lighthaos", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/01/Lighthouse_Icon.png" },
-        { name: "Marshlands", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Marshlands_Icon.png" },
-        { name: "Mason Arch", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1a/Mason_Arch_Icon.png" },
-        { name: "Medieval Times", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0d/Medieval_Times_Icon.png" },
-        { name: "Meltdown", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a8/Meltdown_Icon.png" },
-        { name: "Midnight Issue", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4e/Midnight_Issue_Icon.png" },
-        { name: "Moon Base", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/61/Moon_Base_Icon.png" },
-        { name: "Musaceae Kingdom", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/e0/Musaceae_Kingdom_Icon.png" },
-        { name: "Necropolis", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Necropolis_Icon.png" },
-        { name: "Nether", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Nether_Icon.png" },
-        { name: "Night Station", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/68/Night_Station_Icon.png" },
-        { name: "Northern Lights", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Northern_Lights_Icon.png" },
-        { name: "Pier Pressure", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/30/Pier_Pressure_Icon.png" },
-        { name: "Portland", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4c/Portland_Icon.png" },
-        { name: "Retro Crossroads", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/29/Retro_Crossroads_Icon.png" },
-        { name: "Retro Lighthouse", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Retro_Lighthouse_Icon.png" },
-        { name: "Retro Rocket Arena", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/ae/Retro_Rocket_Arena_Icon.png" },
-        { name: "Retro Stained Temple", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ee/Retro_Stained_Temple_Icon.png" },
-        { name: "Retro The Heights", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/05/Retro_The_Heights_Icon.png" },
-        { name: "Retro Zone", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Retro_Zone_Icon.png" },
-        { name: "Rocket Arena", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Rocket_Arena_Icon.png" },
-        { name: "Ruby Escort", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/16/Ruby_Escort_Icon.png" },
-        { name: "Sacred Mountains", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Sacred_Mountains_Icon.png" },
-        { name: "Simplicity", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Simplicity_Icon.png" },
-        { name: "Sky Islands", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/ca/Sky_Islands_Icon.png" },
-        { name: "Space City", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/de/Space_City_Icon.png" },
-        { name: "Spring Fever", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Spring_Fever_Icon.png" },
-        { name: "Stained Temple", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Stained_Temple_Icon.png" },
-        { name: "Sugar Rush", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b7/Sugar_Rush_Icon.png" },
-        { name: "Summer Castle", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/5f/Summer_Castle_Icon.png" },
-        { name: "The Heavens", type: "Community", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/62/The_Heavens_Icon.png" },
-        { name: "The Heights", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/3d/The_Heights_Icon.png" },
-        { name: "Toyboard", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b1/Toyboard_Icon.png" },
-        { name: "Tropical Industries", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Tropical_Industries_Icon.png" },
-        { name: "Tropical Isles", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/dc/Tropical_Isles_Icon.png" },
-        { name: "U-Turn", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/30/U-Turn_Icon.png" },
-        { name: "Winter Abyss", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Winter_Abyss_Icon.png" },
-        { name: "Winter Bridges", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Winter_Bridges_Icon.png" },
-        { name: "Winter Stronghold", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/6e/Winter_Stronghold_Icon.png" },
-        { name: "Wrecked Battlefield", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4a/Wrecked_Battlefield_Icon.png" },
-        { name: "Wrecked Battlefield II", type: "Стандартная", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Wrecked_Battlefield_II_Icon.png" }
+        { name: "Abandoned City", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Abandoned_City_Icon.png" },
+        { name: "Abyssal Trench", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f6/Abyssal_Trench_Icon.png" },
+        { name: "Area 52", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Area_52_Icon.png" },
+        { name: "Atlas Colosseum", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Atlas_Colosseum_Icon.png" },
+        { name: "Autumn Falling", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Autumn_Falling_Icon.png" },
+        { name: "Black Spot Exchange", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Black_Spot_Exchange_Icon.png" },
+        { name: "Candy Valley", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Candy_Valley_Icon.png" },
+        { name: "Cataclysm", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Cataclysm_Icon.png" },
+        { name: "Chess Board", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ec/Chess_Board_Icon.png" },
+        { name: "Construction Crazy", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0d/Construction_Crazy_Icon.png" },
+        { name: "Coral Deep", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/14/Coral_Deep_Icon.png" },
+        { name: "Crossroads", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/5b/Crossroads_Icon.png" },
+        { name: "Crystal Cave", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/c9/Crystal_Cave_Icon.png" },
+        { name: "Cyber City", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/25/Cyber_City_Icon.png" },
+        { name: "Dead Ahead", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Dead_Ahead_Icon.png" },
+        { name: "Derelict Outpost", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/8/89/Derelict_Outpost_Icon.png" },
+        { name: "Deserted Village", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/8/82/Deserted_Village_Icon.png" },
+        { name: "Dusty Bridges", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/fb/Dusty_Bridges_Icon.png" },
+        { name: "Enchanted Forest", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Enchanted_Forest_Icon.png" },
+        { name: "Farm Lands", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/95/Farm_Lands_Icon.png" },
+        { name: "Forest Camp", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Forest_Camp_Icon.png" },
+        { name: "Four Seasons", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Four_Seasons_Icon.png" },
+        { name: "Fungi Island", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/c8/Fungi_Island_Icon.png" },
+        { name: "Gilded Path", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/2c/Gilded_Path_Icon.png" },
+        { name: "Grass Isle", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/d4/Grass_Isle_Icon.png" },
+        { name: "Happy Home of Robloxia", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/9b/Happy_Home_of_Robloxia_Icon.png" },
+        { name: "Harbor", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/02/Harbor_Icon.png" },
+        { name: "Honey Valley", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a6/Honey_Valley_Icon.png" },
+        { name: "Hot Spot", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Hot_Spot_Icon.png" },
+        { name: "Iceville", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/15/Iceville_Icon.png" },
+        { name: "Infernal Abyss", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/ab/Infernal_Abyss_Icon.png" },
+        { name: "Lay By", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/97/Lay_By_Icon.png" },
+        { name: "Lighthouse", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/01/Lighthouse_Icon.png" },
+        { name: "Marshlands", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Marshlands_Icon.png" },
+        { name: "Mason Arch", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1a/Mason_Arch_Icon.png" },
+        { name: "Medieval Times", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0d/Medieval_Times_Icon.png" },
+        { name: "Meltdown", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a8/Meltdown_Icon.png" },
+        { name: "Midnight Issue", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4e/Midnight_Issue_Icon.png" },
+        { name: "Moon Base", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/61/Moon_Base_Icon.png" },
+        { name: "Musaceae Kingdom", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/e0/Musaceae_Kingdom_Icon.png" },
+        { name: "Necropolis", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Necropolis_Icon.png" },
+        { name: "Nether", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Nether_Icon.png" },
+        { name: "Night Station", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/68/Night_Station_Icon.png" },
+        { name: "Northern Lights", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Northern_Lights_Icon.png" },
+        { name: "Pier Pressure", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/30/Pier_Pressure_Icon.png" },
+        { name: "Portland", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4c/Portland_Icon.png" },
+        { name: "Retro Crossroads", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/29/Retro_Crossroads_Icon.png" },
+        { name: "Retro Lighthouse", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Retro_Lighthouse_Icon.png" },
+        { name: "Retro Rocket Arena", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/ae/Retro_Rocket_Arena_Icon.png" },
+        { name: "Retro Stained Temple", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ee/Retro_Stained_Temple_Icon.png" },
+        { name: "Retro Heights", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/05/Retro_The_Heights_Icon.png" },
+        { name: "Retro Zone", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Retro_Zone_Icon.png" },
+        { name: "Rocket Arena", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Rocket_Arena_Icon.png" },
+        { name: "Ruby Escort", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/16/Ruby_Escort_Icon.png" },
+        { name: "Sacred Mountains", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Sacred_Mountains_Icon.png" },
+        { name: "Simplicity", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Simplicity_Icon.png" },
+        { name: "Sky Islands", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/ca/Sky_Islands_Icon.png" },
+        { name: "Space City", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/de/Space_City_Icon.png" },
+        { name: "Spring Fever", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Spring_Fever_Icon.png" },
+        { name: "Stained Temple", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Stained_Temple_Icon.png" },
+        { name: "Sugar Rush", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b7/Sugar_Rush_Icon.png" },
+        { name: "Summer Castle", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/5f/Summer_Castle_Icon.png" },
+        { name: "The Heavens", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/62/The_Heavens_Icon.png" },
+        { name: "The Heights", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/3d/The_Heights_Icon.png" },
+        { name: "Toyboard", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b1/Toyboard_Icon.png" },
+        { name: "Tropical Industries", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Tropical_Industries_Icon.png" },
+        { name: "Tropical Isles", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/dc/Tropical_Isles_Icon.png" },
+        { name: "U-Turn", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/30/U-Turn_Icon.png" },
+        { name: "Winter Abyss", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Winter_Abyss_Icon.png" },
+        { name: "Winter Bridges", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Winter_Bridges_Icon.png" },
+        { name: "Winter Stronghold", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/6e/Winter_Stronghold_Icon.png" },
+        { name: "Wrecked Battlefield", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4a/Wrecked_Battlefield_Icon.png" },
+        { name: "Wrecked Battlefield II", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Wrecked_Battlefield_II_Icon.png" },
+        // Карты без официальных иконок
+        { name: "Forgotten Docks", img: "" },
+        { name: "Legacy Dusty Bridges", img: "" },
+        { name: "Legacy Gilded Path", img: "" },
+        { name: "Legacy Retro Zone", img: "" },
+        { name: "Legacy Simplicity", img: "" },
+        { name: "Legacy Space City", img: "" },
+        { name: "Legacy Toyboard", img: "" },
+        { name: "Legacy Winter Abyss", img: "" }
     ];
 
-    const diffs = ['easy', 'casual', 'inter', 'molten'];
+    const diffs = ['easy', 'casual', 'inter', 'molten', 'fallen', 'frost'];
     const tableBody = document.getElementById('map-table-body');
-    const usernameInput = document.getElementById('username');
-    const progressText = document.getElementById('progress-text');
-    const progressPercent = document.getElementById('progress-percent');
-    
-    // Элементы превью
-    const pTitle = document.getElementById('p-title');
+    const mainTitle = document.getElementById('main-title');
+    const leaderboardContainer = document.getElementById('leaderboard-container');
+    const newPlayerInput = document.getElementById('new-player-name');
     const pPlaceholder = document.getElementById('p-placeholder');
     const pImg = document.getElementById('p-img');
+    const pMapTitle = document.getElementById('p-map-title');
+    const pImgBox = document.getElementById('p-img-box');
 
-    // Загрузка сохраненного никнейма
-    if(localStorage.getItem('tds_nickname')) {
-        usernameInput.value = localStorage.getItem('tds_nickname');
-    }
+    let currentPlayer = 'Игрок';
+    let playersData = JSON.parse(localStorage.getItem('tds_players')) || { 'Игрок': {} };
 
-    usernameInput.addEventListener('input', () => {
-        localStorage.setItem('tds_nickname', usernameInput.value);
-    });
-
-    // Генерация таблицы
-    mapsData.forEach((map, index) => {
-        const row = document.createElement('tr');
-        row.id = `map-row-${index}`;
-        
-        let tagHtml = map.type !== "Стандартная" ? `<span class="map-tag">${map.type}</span>` : '';
-        
-        let rowHtml = `
-            <td>
-                <span class="map-name" data-index="${index}">${map.name}</span>
-                ${tagHtml}
-            </td>
+    // Генерация нейтрального превью, если нет иконки
+    function generateFallbackPreview(mapName) {
+        return `
+            <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#151b24; color:#556c85; font-size:12px; padding:10px;">
+                <div style="font-size:18px; font-weight:bold; color:var(--accent-color); margin-bottom:5px;">TDS</div>
+                <div>${mapName}</div>
+                <div style="font-size:10px; margin-top:5px;">Нет официальной иконки</div>
+            </div>
         `;
-
-        diffs.forEach(diff => {
-            const key = `tds_${map.name}_${diff}`;
-            const isChecked = localStorage.getItem(key) === 'true' ? 'checked' : '';
-            rowHtml += `
-                <td class="td-center">
-                    <label class="checkbox-container">
-                        <input type="checkbox" data-map="${map.name}" data-diff="${diff}" ${isChecked}>
-                        <span class="checkmark"></span>
-                    </label>
-                </td>
-            `;
-        });
-
-        row.innerHTML = rowHtml;
-        tableBody.appendChild(row);
-    });
-
-    // Обновление прогресса
-    function updateProgress() {
-        const totalCheckboxes = mapsData.length * diffs.length;
-        let checkedCount = 0;
-        
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            if(cb.checked) checkedCount++;
-        });
-
-        progressText.innerText = `${checkedCount} / ${totalCheckboxes}`;
-        const percent = totalCheckboxes > 0 ? Math.round((checkedCount / totalCheckboxes) * 100) : 0;
-        progressPercent.innerText = `${percent}%`;
     }
 
-    // Слушатель кликов по чекбоксам
-    tableBody.addEventListener('change', (e) => {
-        if(e.target.type === 'checkbox') {
-            const mapName = e.target.getAttribute('data-map');
-            const diff = e.target.getAttribute('data-diff');
-            const key = `tds_${mapName}_${diff}`;
-            localStorage.setItem(key, e.target.checked);
-            updateProgress();
+    // Сохранение данных
+    function saveData() {
+        localStorage.setItem('tds_players', JSON.stringify(playersData));
+    }
+
+    // Обновление прогресса для конкретного игрока
+    function getPlayerProgress(playerName) {
+        const total = mapsData.length * diffs.length;
+        let checked = 0;
+        if (playersData[playerName]) {
+            Object.values(playersData[playerName]).forEach(val => { if (val) checked++; });
+        }
+        return total > 0 ? Math.round((checked / total) * 100) : 0;
+    }
+
+    // Обновление ледерборда (сортировка по процентам)
+    function updateLeaderboard() {
+        leaderboardContainer.innerHTML = '';
+        const sortedPlayers = Object.keys(playersData).sort((a, b) => getPlayerProgress(b) - getPlayerProgress(a));
+
+        sortedPlayers.forEach(playerName => {
+            const pct = getPlayerProgress(playerName);
+            const item = document.createElement('li');
+            item.className = `leaderboard-item ${playerName === currentPlayer ? 'active' : ''}`;
+            item.innerHTML = `
+                <div class="player-info">
+                    <span class="player-name">${playerName}</span>
+                    <span class="player-pct">${pct}% Пройдено</span>
+                </div>
+                <button class="delete-prof-btn" data-player="${playerName}">×</button>
+            `;
+            leaderboardContainer.appendChild(item);
+        });
+    }
+
+    // Отрисовка чекбоксов для текущего игрока
+    function renderChecklist() {
+        tableBody.innerHTML = '';
+        mainTitle.innerText = `TDS Progress: ${currentPlayer}`;
+
+        mapsData.forEach((map, index) => {
+            const row = document.createElement('tr');
+            row.id = `map-row-${index}`;
+            let rowHtml = `<td><span class="map-name" data-index="${index}">${map.name}</span></td>`;
+
+            diffs.forEach(diff => {
+                const key = `${map.name}_${diff}`;
+                const isChecked = playersData[currentPlayer] && playersData[currentPlayer][key] ? 'checked' : '';
+                rowHtml += `
+                    <td class="td-center">
+                        <label class="checkbox-container">
+                            <input type="checkbox" data-map="${map.name}" data-diff="${diff}" ${isChecked}>
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>`;
+            });
+            row.innerHTML = rowHtml;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Переключение профиля
+    leaderboardContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-prof-btn')) {
+            const playerToDelete = e.target.getAttribute('data-player');
+            if (confirm(`Удалить профиль "${playerToDelete}" и весь его прогресс?`)) {
+                delete playersData[playerToDelete];
+                if (currentPlayer === playerToDelete) {
+                    currentPlayer = Object.keys(playersData)[0] || 'Игрок';
+                    if (!playersData[currentPlayer]) playersData[currentPlayer] = {};
+                }
+                saveData();
+                updateLeaderboard();
+                renderChecklist();
+            }
+            return;
+        }
+
+        const item = e.target.closest('.leaderboard-item');
+        if (item) {
+            currentPlayer = item.querySelector('.player-name').innerText;
+            renderChecklist();
+            updateLeaderboard();
         }
     });
 
-    // Наведение мышки для превью картинки
-    tableBody.addEventListener('mouseover', (e) => {
-        if(e.target.classList.contains('map-name')) {
-            const index = e.target.getAttribute('data-index');
-            const map = mapsData[index];
-            
-            pTitle.innerText = map.name;
-            if(map.img) {
-                pImg.src = map.img;
-                pImg.style.display = 'block';
-                pPlaceholder.style.display = 'none';
-            } else {
-                pImg.style.display = 'none';
-                pPlaceholder.style.display = 'block';
-                pPlaceholder.innerText = 'Нет изображения для этой старой карты';
-            }
+    // Добавление нового профиля
+    document.getElementById('btn-add-player').addEventListener('click', () => {
+        const newPlayerName = newPlayerInput.value.trim();
+        if (newPlayerName && !playersData[newPlayerName]) {
+            playersData[newPlayerName] = {};
+            newPlayerInput.value = '';
+            currentPlayer = newPlayerName;
+            saveData();
+            updateLeaderboard();
+            renderChecklist();
+        } else if (playersData[newPlayerName]) {
+            alert('Игрок с таким ником уже есть!');
+        }
+    });
+
+    // Клики по чекбоксам
+    tableBody.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox') {
+            const mapName = e.target.getAttribute('data-map');
+            const diff = e.target.getAttribute('data-diff');
+            if (!playersData[currentPlayer]) playersData[currentPlayer] = {};
+            playersData[currentPlayer][`${mapName}_${diff}`] = e.target.checked;
+            saveData();
+            updateLeaderboard(); // Обновляем проценты в ледерборде мгновенно
         }
     });
 
     // Фича "Где я остановился?"
     document.getElementById('btn-where-am-i').addEventListener('click', () => {
-        // Убираем прошлую подсветку
         document.querySelectorAll('tr').forEach(r => r.classList.remove('highlight-row'));
-
-        // Ищем первую карту, где заполнено не все
-        for(let i = 0; i < mapsData.length; i++) {
+        for (let i = 0; i < mapsData.length; i++) {
             let mapComplete = true;
-            diffs.forEach(diff => {
-                const checked = localStorage.getItem(`tds_${mapsData[i].name}_${diff}`) === 'true';
-                if(!checked) mapComplete = false;
-            });
-
-            if(!mapComplete) {
+            for (let diff of diffs) {
+                if (!playersData[currentPlayer] || !playersData[currentPlayer][`${mapsData[i].name}_${diff}`]) {
+                    mapComplete = false; break;
+                }
+            }
+            if (!mapComplete) {
                 const targetRow = document.getElementById(`map-row-${i}`);
                 targetRow.classList.add('highlight-row');
                 targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -584,21 +513,48 @@
         }
     });
 
-    // Сброс всех галочек
+    // Сброс текущего профиля
     document.getElementById('btn-reset').addEventListener('click', () => {
-        if(confirm('Ты уверен, что хочешь полностью сбросить весь прогресс карт?')) {
-            mapsData.forEach(map => {
-                diffs.forEach(diff => {
-                    localStorage.removeItem(`tds_${map.name}_${diff}`);
-                });
-            });
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            updateProgress();
+        if (confirm(`Очистить весь прогресс карт для текущего профиля "${currentPlayer}"?`)) {
+            playersData[currentPlayer] = {};
+            saveData();
+            renderChecklist();
+            updateLeaderboard();
         }
     });
 
-    // Инициализация при старте
-    updateProgress();
+    // Наведение на карту для превью
+    tableBody.addEventListener('mouseover', (e) => {
+        if (e.target.classList.contains('map-name')) {
+            const mapIndex = e.target.getAttribute('data-index');
+            const map = mapsData[mapIndex];
+
+            if (map.img) {
+                pImg.src = map.img;
+                pImg.style.display = 'block';
+                pMapTitle.innerText = map.name;
+                pMapTitle.style.display = 'block';
+                pPlaceholder.style.display = 'none';
+                // Убираем старое нейтральное превью, если оно было
+                const oldFallback = pImgBox.querySelector('div[style*="width:100%"]');
+                if(oldFallback) oldFallback.remove();
+            } else {
+                pImg.style.display = 'none';
+                pMapTitle.style.display = 'none';
+                pPlaceholder.style.display = 'none';
+                // Добавляем красивое нейтральное превью
+                const oldFallback = pImgBox.querySelector('div[style*="width:100%"]');
+                if(oldFallback) oldFallback.remove();
+                pImgBox.insertAdjacentHTML('afterbegin', generateFallbackPreview(map.name));
+            }
+        }
+    });
+
+    // Инициализация
+    if(Object.keys(playersData).length === 0) playersData = {'Игрок': {}};
+    if(!currentPlayer) currentPlayer = Object.keys(playersData)[0];
+    updateLeaderboard();
+    renderChecklist();
 </script>
 </body>
 </html>

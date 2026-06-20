@@ -89,16 +89,43 @@
             text-align: center;
         }
 
-        .profile-manager {
+        /* Вкладки для Входа / Регистрации */
+        .auth-tabs {
             display: flex;
+            gap: 5px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #2a3744;
+            padding-bottom: 5px;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            background: #151b24;
+            color: var(--text-color);
+            border: 1px solid #2a3744;
+            padding: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .auth-tab-btn.active {
+            background: var(--accent-hover);
+            color: var(--bg-color);
+            border-color: var(--accent-color);
+        }
+
+        .auth-form {
+            display: none;
             flex-direction: column;
             gap: 8px;
             margin-bottom: 15px;
         }
 
-        .input-row {
+        .auth-form.active {
             display: flex;
-            gap: 8px;
         }
 
         input[type="text"], input[type="password"] {
@@ -117,21 +144,21 @@
             box-shadow: 0 0 8px rgba(102, 252, 241, 0.4);
         }
 
-        button {
+        .submit-btn {
             background: var(--accent-hover);
             color: var(--bg-color);
             border: none;
-            padding: 8px 12px;
+            padding: 9px 12px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.2s ease;
             text-transform: uppercase;
-            font-size: 11px;
-            white-space: nowrap;
+            font-size: 12px;
+            width: 100%;
+            transition: all 0.2s ease;
         }
 
-        button:hover {
+        .submit-btn:hover {
             background: var(--accent-color);
             transform: translateY(-1px);
         }
@@ -141,8 +168,11 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 250px;
+            max-height: 220px;
             overflow-y: auto;
+            margin-top: 10px;
+            border-top: 1px solid #2a3744;
+            padding-top: 10px;
         }
 
         .leaderboard-item {
@@ -173,9 +203,11 @@
             background: transparent;
             color: #ff7675;
             padding: 2px 6px;
-            font-size: 10px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
         }
-        .delete-prof-btn:hover { background: #3a1c1c; }
+        .delete-prof-btn:hover { background: #3a1c1c; border-radius: 4px; }
 
         .controls {
             display: flex;
@@ -183,8 +215,21 @@
             margin-bottom: 20px;
         }
 
+        .controls button {
+            background: var(--accent-hover);
+            color: var(--bg-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+        .controls button:hover { background: var(--accent-color); }
+
         .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; background: #1a222d; }
+        <table> { width: 100%; border-collapse: collapse; background: #1a222d; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #2a3744; font-size: 14px; }
         th { background-color: #151b24; color: var(--accent-color); text-transform: uppercase; font-size: 12px; }
         .th-center, .td-center { text-align: center; }
@@ -247,7 +292,7 @@
         <h1 id="main-title">TDS Progress: Игрок</h1>
         <div class="controls" style="margin-top: 15px;">
             <button id="btn-where-am-i">Где я остановился?</button>
-            <button id="btn-reset" style="background: #3a1c1c; color: #ff7675;">Сбросить текущий профиль</button>
+            <button id="btn-reset" style="background: #3a1c1c; color: #ff7675;">Сбросить текущий прогресс</button>
         </div>
 
         <div class="table-container">
@@ -272,15 +317,26 @@
         <div class="panel">
             <h2>Таблица игроков</h2>
             <div class="auth-warning">
-                ⚠️ ПРИМЕЧАНИЕ: Придумай НОВЫЙ пароль!<br>НЕ вводи свой пароль от майнкрафта или ROBLOX!
+                ⚠️ ВНИМАНИЕ: Придумывай новый пароль!<br>НЕ используй пароли от Roblox или почты!
             </div>
-            <div class="profile-manager">
-                <input type="text" id="new-player-name" placeholder="Ник игрока...">
-                <div class="input-row">
-                    <input type="password" id="new-player-pass" placeholder="Придумай пароль...">
-                    <button id="btn-add-player">Войти/Создать</button>
-                </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" onclick="switchAuthTab('login')">Вход</button>
+                <button class="auth-tab-btn" onclick="switchAuthTab('register')">Регистрация</button>
             </div>
+
+            <div id="form-login" class="auth-form active">
+                <input type="text" id="login-username" placeholder="Твой ник...">
+                <input type="password" id="login-password" placeholder="Твой пароль...">
+                <button class="submit-btn" id="btn-login-submit">Войти</button>
+            </div>
+
+            <div id="form-register" class="auth-form">
+                <input type="text" id="reg-username" placeholder="Придумай ник...">
+                <input type="password" id="reg-password" placeholder="Придумай пароль...">
+                <button class="submit-btn" id="btn-reg-submit" style="background: #27ae60; color: white;">Создать аккаунт</button>
+            </div>
+
             <ul class="leaderboard-list" id="leaderboard-container"></ul>
         </div>
 
@@ -296,81 +352,83 @@
 </div>
 
 <script>
-    // База данных официальных иконок карт из TDS Wiki
+    // Используем специальный проксирующий CORS URL, чтобы обойти защиту Fandom/Wikia на хотлинкинг картинок
+    const imgProxy = "https://images.weserv.nl/?url=";
+
     const mapsData = [
-        { name: "Abandoned City", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Abandoned_City_Icon.png" },
-        { name: "Abyssal Trench", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f6/Abyssal_Trench_Icon.png" },
-        { name: "Area 52", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Area_52_Icon.png" },
-        { name: "Atlas Colosseum", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Atlas_Colosseum_Icon.png" },
-        { name: "Autumn Falling", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Autumn_Falling_Icon.png" },
-        { name: "Black Spot Exchange", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Black_Spot_Exchange_Icon.png" },
-        { name: "Candy Valley", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Candy_Valley_Icon.png" },
-        { name: "Cataclysm", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Cataclysm_Icon.png" },
-        { name: "Chess Board", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ec/Chess_Board_Icon.png" },
+        { name: "Abandoned City", img: "static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Abandoned_City_Icon.png" },
+        { name: "Abyssal Trench", img: "static.wikia.nocookie.net/towerdefensesimulator/images/f/f6/Abyssal_Trench_Icon.png" },
+        { name: "Area 52", img: "static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Area_52_Icon.png" },
+        { name: "Atlas Colosseum", img: "static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Atlas_Colosseum_Icon.png" },
+        { name: "Autumn Falling", img: "static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Autumn_Falling_Icon.png" },
+        { name: "Black Spot Exchange", img: "static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Black_Spot_Exchange_Icon.png" },
+        { name: "Candy Valley", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Candy_Valley_Icon.png" },
+        { name: "Cataclysm", img: "static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Cataclysm_Icon.png" },
+        { name: "Chess Board", img: "static.wikia.nocookie.net/towerdefensesimulator/images/e/ec/Chess_Board_Icon.png" },
         { name: "Construction Crazy", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0d/Construction_Crazy_Icon.png" },
-        { name: "Coral Deep", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/14/Coral_Deep_Icon.png" },
-        { name: "Crossroads", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/5b/Crossroads_Icon.png" },
-        { name: "Crystal Cave", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/c9/Crystal_Cave_Icon.png" },
-        { name: "Cyber City", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/25/Cyber_City_Icon.png" },
-        { name: "Dead Ahead", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Dead_Ahead_Icon.png" },
-        { name: "Derelict Outpost", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/8/89/Derelict_Outpost_Icon.png" },
-        { name: "Deserted Village", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/8/82/Deserted_Village_Icon.png" },
-        { name: "Dusty Bridges", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/fb/Dusty_Bridges_Icon.png" },
-        { name: "Enchanted Forest", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Enchanted_Forest_Icon.png" },
-        { name: "Farm Lands", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/95/Farm_Lands_Icon.png" },
-        { name: "Forest Camp", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Forest_Camp_Icon.png" },
-        { name: "Four Seasons", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Four_Seasons_Icon.png" },
-        { name: "Fungi Island", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/c8/Fungi_Island_Icon.png" },
-        { name: "Gilded Path", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/2c/Gilded_Path_Icon.png" },
-        { name: "Grass Isle", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/d4/Grass_Isle_Icon.png" },
-        { name: "Happy Home of Robloxia", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/9b/Happy_Home_of_Robloxia_Icon.png" },
-        { name: "Harbor", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/02/Harbor_Icon.png" },
-        { name: "Honey Valley", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a6/Honey_Valley_Icon.png" },
-        { name: "Hot Spot", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Hot_Spot_Icon.png" },
-        { name: "Iceville", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/15/Iceville_Icon.png" },
-        { name: "Infernal Abyss", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/ab/Infernal_Abyss_Icon.png" },
-        { name: "Lay By", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/97/Lay_By_Icon.png" },
-        { name: "Lighthouse", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/01/Lighthouse_Icon.png" },
-        { name: "Marshlands", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Marshlands_Icon.png" },
-        { name: "Mason Arch", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1a/Mason_Arch_Icon.png" },
-        { name: "Medieval Times", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0d/Medieval_Times_Icon.png" },
-        { name: "Meltdown", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a8/Meltdown_Icon.png" },
-        { name: "Midnight Issue", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4e/Midnight_Issue_Icon.png" },
-        { name: "Moon Base", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/61/Moon_Base_Icon.png" },
-        { name: "Musaceae Kingdom", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/e0/Musaceae_Kingdom_Icon.png" },
-        { name: "Necropolis", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Necropolis_Icon.png" },
-        { name: "Nether", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Nether_Icon.png" },
-        { name: "Night Station", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/68/Night_Station_Icon.png" },
-        { name: "Northern Lights", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Northern_Lights_Icon.png" },
-        { name: "Pier Pressure", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/30/Pier_Pressure_Icon.png" },
-        { name: "Portland", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4c/Portland_Icon.png" },
-        { name: "Retro Crossroads", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/2/29/Retro_Crossroads_Icon.png" },
-        { name: "Retro Lighthouse", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Retro_Lighthouse_Icon.png" },
-        { name: "Retro Rocket Arena", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/ae/Retro_Rocket_Arena_Icon.png" },
-        { name: "Retro Stained Temple", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ee/Retro_Stained_Temple_Icon.png" },
-        { name: "Retro Heights", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/05/Retro_The_Heights_Icon.png" },
-        { name: "Retro Zone", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Retro_Zone_Icon.png" },
-        { name: "Rocket Arena", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Rocket_Arena_Icon.png" },
-        { name: "Ruby Escort", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/16/Ruby_Escort_Icon.png" },
-        { name: "Sacred Mountains", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Sacred_Mountains_Icon.png" },
-        { name: "Simplicity", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Simplicity_Icon.png" },
-        { name: "Sky Islands", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/c/ca/Sky_Islands_Icon.png" },
-        { name: "Space City", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/de/Space_City_Icon.png" },
-        { name: "Spring Fever", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Spring_Fever_Icon.png" },
-        { name: "Stained Temple", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Stained_Temple_Icon.png" },
-        { name: "Sugar Rush", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b7/Sugar_Rush_Icon.png" },
-        { name: "Summer Castle", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/5/5f/Summer_Castle_Icon.png" },
-        { name: "The Heavens", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/62/The_Heavens_Icon.png" },
-        { name: "The Heights", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/3d/The_Heights_Icon.png" },
-        { name: "Toyboard", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/b/b1/Toyboard_Icon.png" },
-        { name: "Tropical Industries", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Tropical_Industries_Icon.png" },
-        { name: "Tropical Isles", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/d/dc/Tropical_Isles_Icon.png" },
-        { name: "U-Turn", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/3/30/U-Turn_Icon.png" },
-        { name: "Winter Abyss", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Winter_Abyss_Icon.png" },
-        { name: "Winter Bridges", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Winter_Bridges_Icon.png" },
-        { name: "Winter Stronghold", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/6/6e/Winter_Stronghold_Icon.png" },
-        { name: "Wrecked Battlefield", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/4/4a/Wrecked_Battlefield_Icon.png" },
-        { name: "Wrecked Battlefield II", img: "https://static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Wrecked_Battlefield_II_Icon.png" },
+        { name: "Coral Deep", img: "static.wikia.nocookie.net/towerdefensesimulator/images/1/14/Coral_Deep_Icon.png" },
+        { name: "Crossroads", img: "static.wikia.nocookie.net/towerdefensesimulator/images/5/5b/Crossroads_Icon.png" },
+        { name: "Crystal Cave", img: "static.wikia.nocookie.net/towerdefensesimulator/images/c/c9/Crystal_Cave_Icon.png" },
+        { name: "Cyber City", img: "static.wikia.nocookie.net/towerdefensesimulator/images/2/25/Cyber_City_Icon.png" },
+        { name: "Dead Ahead", img: "static.wikia.nocookie.net/towerdefensesimulator/images/5/52/Dead_Ahead_Icon.png" },
+        { name: "Derelict Outpost", img: "static.wikia.nocookie.net/towerdefensesimulator/images/8/89/Derelict_Outpost_Icon.png" },
+        { name: "Deserted Village", img: "static.wikia.nocookie.net/towerdefensesimulator/images/8/82/Deserted_Village_Icon.png" },
+        { name: "Dusty Bridges", img: "static.wikia.nocookie.net/towerdefensesimulator/images/f/fb/Dusty_Bridges_Icon.png" },
+        { name: "Enchanted Forest", img: "static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Enchanted_Forest_Icon.png" },
+        { name: "Farm Lands", img: "static.wikia.nocookie.net/towerdefensesimulator/images/9/95/Farm_Lands_Icon.png" },
+        { name: "Forest Camp", img: "static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Forest_Camp_Icon.png" },
+        { name: "Four Seasons", img: "static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Four_Seasons_Icon.png" },
+        { name: "Fungi Island", img: "static.wikia.nocookie.net/towerdefensesimulator/images/c/c8/Fungi_Island_Icon.png" },
+        { name: "Gilded Path", img: "static.wikia.nocookie.net/towerdefensesimulator/images/2/2c/Gilded_Path_Icon.png" },
+        { name: "Grass Isle", img: "static.wikia.nocookie.net/towerdefensesimulator/images/d/d4/Grass_Isle_Icon.png" },
+        { name: "Happy Home of Robloxia", img: "static.wikia.nocookie.net/towerdefensesimulator/images/9/9b/Happy_Home_of_Robloxia_Icon.png" },
+        { name: "Harbor", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/02/Harbor_Icon.png" },
+        { name: "Honey Valley", img: "static.wikia.nocookie.net/towerdefensesimulator/images/a/a6/Honey_Valley_Icon.png" },
+        { name: "Hot Spot", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Hot_Spot_Icon.png" },
+        { name: "Iceville", img: "static.wikia.nocookie.net/towerdefensesimulator/images/1/15/Iceville_Icon.png" },
+        { name: "Infernal Abyss", img: "static.wikia.nocookie.net/towerdefensesimulator/images/a/ab/Infernal_Abyss_Icon.png" },
+        { name: "Lay By", img: "static.wikia.nocookie.net/towerdefensesimulator/images/9/97/Lay_By_Icon.png" },
+        { name: "Lighthouse", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/01/Lighthouse_Icon.png" },
+        { name: "Marshlands", img: "static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Marshlands_Icon.png" },
+        { name: "Mason Arch", img: "static.wikia.nocookie.net/towerdefensesimulator/images/1/1a/Mason_Arch_Icon.png" },
+        { name: "Medieval Times", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/0d/Medieval_Times_Icon.png" },
+        { name: "Meltdown", img: "static.wikia.nocookie.net/towerdefensesimulator/images/a/a8/Meltdown_Icon.png" },
+        { name: "Midnight Issue", img: "static.wikia.nocookie.net/towerdefensesimulator/images/4/4e/Midnight_Issue_Icon.png" },
+        { name: "Moon Base", img: "static.wikia.nocookie.net/towerdefensesimulator/images/6/61/Moon_Base_Icon.png" },
+        { name: "Musaceae Kingdom", img: "static.wikia.nocookie.net/towerdefensesimulator/images/e/e0/Musaceae_Kingdom_Icon.png" },
+        { name: "Necropolis", img: "static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Necropolis_Icon.png" },
+        { name: "Nether", img: "static.wikia.nocookie.net/towerdefensesimulator/images/f/f3/Nether_Icon.png" },
+        { name: "Night Station", img: "static.wikia.nocookie.net/towerdefensesimulator/images/6/68/Night_Station_Icon.png" },
+        { name: "Northern Lights", img: "static.wikia.nocookie.net/towerdefensesimulator/images/9/91/Northern_Lights_Icon.png" },
+        { name: "Pier Pressure", img: "static.wikia.nocookie.net/towerdefensesimulator/images/3/30/Pier_Pressure_Icon.png" },
+        { name: "Portland", img: "static.wikia.nocookie.net/towerdefensesimulator/images/4/4c/Portland_Icon.png" },
+        { name: "Retro Crossroads", img: "static.wikia.nocookie.net/towerdefensesimulator/images/2/29/Retro_Crossroads_Icon.png" },
+        { name: "Retro Lighthouse", img: "static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Retro_Lighthouse_Icon.png" },
+        { name: "Retro Rocket Arena", img: "static.wikia.nocookie.net/towerdefensesimulator/images/a/ae/Retro_Rocket_Arena_Icon.png" },
+        { name: "Retro Stained Temple", img: "static.wikia.nocookie.net/towerdefensesimulator/images/e/ee/Retro_Stained_Temple_Icon.png" },
+        { name: "Retro Heights", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/05/Retro_The_Heights_Icon.png" },
+        { name: "Retro Zone", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/0a/Retro_Zone_Icon.png" },
+        { name: "Rocket Arena", img: "static.wikia.nocookie.net/towerdefensesimulator/images/d/df/Rocket_Arena_Icon.png" },
+        { name: "Ruby Escort", img: "static.wikia.nocookie.net/towerdefensesimulator/images/1/16/Ruby_Escort_Icon.png" },
+        { name: "Sacred Mountains", img: "static.wikia.nocookie.net/towerdefensesimulator/images/0/07/Sacred_Mountains_Icon.png" },
+        { name: "Simplicity", img: "static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Simplicity_Icon.png" },
+        { name: "Sky Islands", img: "static.wikia.nocookie.net/towerdefensesimulator/images/c/ca/Sky_Islands_Icon.png" },
+        { name: "Space City", img: "static.wikia.nocookie.net/towerdefensesimulator/images/d/de/Space_City_Icon.png" },
+        { name: "Spring Fever", img: "static.wikia.nocookie.net/towerdefensesimulator/images/5/53/Spring_Fever_Icon.png" },
+        { name: "Stained Temple", img: "static.wikia.nocookie.net/towerdefensesimulator/images/b/b3/Stained_Temple_Icon.png" },
+        { name: "Sugar Rush", img: "static.wikia.nocookie.net/towerdefensesimulator/images/b/b7/Sugar_Rush_Icon.png" },
+        { name: "Summer Castle", img: "static.wikia.nocookie.net/towerdefensesimulator/images/5/5f/Summer_Castle_Icon.png" },
+        { name: "The Heavens", img: "static.wikia.nocookie.net/towerdefensesimulator/images/6/62/The_Heavens_Icon.png" },
+        { name: "The Heights", img: "static.wikia.nocookie.net/towerdefensesimulator/images/3/3d/The_Heights_Icon.png" },
+        { name: "Toyboard", img: "static.wikia.nocookie.net/towerdefensesimulator/images/b/b1/Toyboard_Icon.png" },
+        { name: "Tropical Industries", img: "static.wikia.nocookie.net/towerdefensesimulator/images/1/1b/Tropical_Industries_Icon.png" },
+        { name: "Tropical Isles", img: "static.wikia.nocookie.net/towerdefensesimulator/images/d/dc/Tropical_Isles_Icon.png" },
+        { name: "U-Turn", img: "static.wikia.nocookie.net/towerdefensesimulator/images/3/30/U-Turn_Icon.png" },
+        { name: "Winter Abyss", img: "static.wikia.nocookie.net/towerdefensesimulator/images/e/ef/Winter_Abyss_Icon.png" },
+        { name: "Winter Bridges", img: "static.wikia.nocookie.net/towerdefensesimulator/images/7/77/Winter_Bridges_Icon.png" },
+        { name: "Winter Stronghold", img: "static.wikia.nocookie.net/towerdefensesimulator/images/6/6e/Winter_Stronghold_Icon.png" },
+        { name: "Wrecked Battlefield", img: "static.wikia.nocookie.net/towerdefensesimulator/images/4/4a/Wrecked_Battlefield_Icon.png" },
+        { name: "Wrecked Battlefield II", img: "static.wikia.nocookie.net/towerdefensesimulator/images/a/a2/Wrecked_Battlefield_II_Icon.png" },
         { name: "Forgotten Docks", img: "" },
         { name: "Legacy Dusty Bridges", img: "" },
         { name: "Legacy Gilded Path", img: "" },
@@ -385,8 +443,6 @@
     const tableBody = document.getElementById('map-table-body');
     const mainTitle = document.getElementById('main-title');
     const leaderboardContainer = document.getElementById('leaderboard-container');
-    const newPlayerInput = document.getElementById('new-player-name');
-    const newPlayerPass = document.getElementById('new-player-pass');
     
     const pPlaceholder = document.getElementById('p-placeholder');
     const pImg = document.getElementById('p-img');
@@ -395,11 +451,23 @@
 
     let currentPlayer = 'Игрок';
     
-    // Структура данных в LocalStorage теперь хранит и захешированный/записанный пароль
-    // Формат: { 'Игрок': { password: '123', progress: { 'Map_easy': true } } }
     let playersData = JSON.parse(localStorage.getItem('tds_secured_players')) || { 
         'Игрок': { password: '', progress: {} } 
     };
+
+    // Переключение вкладок формы
+    function switchAuthTab(type) {
+        document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        
+        if (type === 'login') {
+            document.querySelectorAll('.auth-tab-btn')[0].classList.add('active');
+            document.getElementById('form-login').classList.add('active');
+        } else {
+            document.querySelectorAll('.auth-tab-btn')[1].classList.add('active');
+            document.getElementById('form-register').classList.add('active');
+        }
+    }
 
     function generateFallbackPreview(mapName) {
         return `
@@ -468,12 +536,11 @@
         });
     }
 
-    // Управление профилями (Клик по ледерборду требует пароль, если он задан)
+    // Клик по таблице лидеров — смена аккаунта (с запросом пароля, если установлен)
     leaderboardContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('delete-prof-btn')) {
             const playerToDelete = e.target.getAttribute('data-player');
             
-            // Если у профиля есть пароль, просим его ввести для удаления
             if (playersData[playerToDelete].password !== '') {
                 const passCheck = prompt(`Введите пароль для удаления профиля "${playerToDelete}":`);
                 if (passCheck !== playersData[playerToDelete].password) {
@@ -513,42 +580,61 @@
         }
     });
 
-    // Создание профиля или вход через панель формы
-    document.getElementById('btn-add-player').addEventListener('click', () => {
-        const name = newPlayerInput.value.trim();
-        const pass = newPlayerPass.value.trim();
+    // ОБРАБОТКА ВХОДА (ОТДЕЛЬНО)
+    document.getElementById('btn-login-submit').addEventListener('click', () => {
+        const name = document.getElementById('login-username').value.trim();
+        const pass = document.getElementById('login-password').value.trim();
 
-        if (!name) {
-            alert('Введите ник игрока!');
+        if (!name) { alert('Введите ник игрока!'); return; }
+
+        if (!playersData[name]) {
+            alert('Такой игрок не найден! Сначала зарегистрируйся во вкладке "Регистрация".');
             return;
         }
 
-        if (playersData[name]) {
-            // Если игрок уже существует — это попытка входа
-            if (playersData[name].password !== '' && playersData[name].password !== pass) {
-                alert('Неверный пароль для этого игрока!');
-                return;
-            }
-            currentPlayer = name;
-            alert(`Успешный вход в профиль: ${name}`);
-        } else {
-            // Регистрация нового аккаунта
-            playersData[name] = {
-                password: pass, // Сохраняем пароль
-                progress: {}
-            };
-            currentPlayer = name;
-            alert(`Создан новый защищённый профиль: ${name}`);
+        if (playersData[name].password !== pass) {
+            alert('Неверный пароль!');
+            return;
         }
 
-        newPlayerInput.value = '';
-        newPlayerPass.value = '';
-        saveData();
+        currentPlayer = name;
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        alert(`Успешный вход! Текущий игрок: ${name}`);
         updateLeaderboard();
         renderChecklist();
     });
 
-    // Клики по чекбоксам
+    // ОБРАБОТКА РЕГИСТРАЦИИ (ОТДЕЛЬНО)
+    document.getElementById('btn-reg-submit').addEventListener('click', () => {
+        const name = document.getElementById('reg-username').value.trim();
+        const pass = document.getElementById('reg-password').value.trim();
+
+        if (!name) { alert('Придумай ник!'); return; }
+        if (!pass) { alert('Придумай пароль!'); return; }
+
+        if (playersData[name]) {
+            alert('Игрок с таким ником уже существует! Выбери другой ник или войди.');
+            return;
+        }
+
+        playersData[name] = {
+            password: pass,
+            progress: {}
+        };
+        
+        currentPlayer = name;
+        document.getElementById('reg-username').value = '';
+        document.getElementById('reg-password').value = '';
+        
+        saveData();
+        alert(`Аккаунт ${name} успешно создан!`);
+        switchAuthTab('login');
+        updateLeaderboard();
+        renderChecklist();
+    });
+
+    // Изменение чекбоксов карт
     tableBody.addEventListener('change', (e) => {
         if (e.target.type === 'checkbox') {
             const mapName = e.target.getAttribute('data-map');
@@ -562,18 +648,18 @@
         }
     });
 
-    // Наведение мыши на карту для показа картинок
+    // Показ превью карт при наведении (через прокси-обходчик картинок)
     tableBody.addEventListener('mouseover', (e) => {
         if (e.target.classList.contains('map-name')) {
             const mapIndex = e.target.getAttribute('data-index');
             const map = mapsData[mapIndex];
 
-            // Чистим старый fallback элемент, если он остался
             const oldFallback = document.getElementById('fallback-preview-node');
             if (oldFallback) oldFallback.remove();
 
             if (map && map.img !== "") {
-                pImg.src = map.img;
+                // Подставляем прокси для бесперебойной загрузки иконок
+                pImg.src = imgProxy + encodeURIComponent(map.img);
                 pImg.style.display = 'block';
                 pMapTitle.innerText = map.name;
                 pMapTitle.style.display = 'block';
@@ -609,7 +695,7 @@
         }
     });
 
-    // Очистка текущего прогресса
+    // Сброс текущего прогресса
     document.getElementById('btn-reset').addEventListener('click', () => {
         if (confirm(`Очистить весь прогресс карт для текущего профиля "${currentPlayer}"?`)) {
             playersData[currentPlayer].progress = {};
@@ -619,7 +705,7 @@
         }
     });
 
-    // Запуск приложения
+    // Старт
     updateLeaderboard();
     renderChecklist();
 </script>
